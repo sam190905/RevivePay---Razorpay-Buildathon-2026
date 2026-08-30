@@ -1,0 +1,1 @@
+"""RevivePay backend application."""
