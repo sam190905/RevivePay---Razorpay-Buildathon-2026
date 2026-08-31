@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from typing import Dict, Any
 import uuid
 import time
 import asyncio
 import httpx
 from pydantic import BaseModel
+
+from app.models.recovery_case import RecoveryCase
+from app.models.recovery_action import RecoveryAction
+from app.models.payment import Payment
 
 from app.db.session import get_db
 from app.config import settings
@@ -81,22 +86,72 @@ async def trigger_demo_scenario(request: DemoScenarioRequest, background_tasks: 
         "created_at": int(time.time()) + 3
     }
     
-    background_tasks.add_task(_run_scenario, request.scenario, failed_payload, paid_payload)
+    background_tasks.add_task(_run_scenario, request.scenario, failed_payload)
     
     return {"status": "success", "message": f"Triggered scenario: {request.scenario}", "payment_id": payment_id}
 
-async def _run_scenario(scenario: str, failed_payload: Dict[str, Any], paid_payload: Dict[str, Any]):
+class SimulatePaymentRequest(BaseModel):
+    case_id: str
+
+@router.post("/scenarios/simulate-payment")
+async def simulate_customer_payment(request: SimulatePaymentRequest, db: AsyncSession = Depends(get_db)):
+    """Simulate a customer paying a simulated payment link in Developer Mode."""
+    
+    case = await db.scalar(select(RecoveryCase).where(RecoveryCase.id == request.case_id))
+    if not case:
+        return {"status": "error", "message": "Case not found"}
+        
+    payment = await db.scalar(select(Payment).where(Payment.id == case.payment_id))
+    if not payment:
+        return {"status": "error", "message": "Payment not found"}
+
+    # Find the provider_id from the executed action
+    action = await db.scalar(
+        select(RecoveryAction)
+        .where(RecoveryAction.recovery_case_id == case.id)
+        .order_by(RecoveryAction.executed_at.desc())
+        .limit(1)
+    )
+    
+    provider_id = "unknown"
+    if action and action.result:
+        import json
+        try:
+            res_dict = json.loads(action.result)
+            provider_id = res_dict.get("provider_id", "unknown")
+        except:
+            pass
+
+    paid_payload = {
+        "entity": "event",
+        "account_id": "acc_1234567890",
+        "event": "payment_link.paid",
+        "contains": ["payment_link"],
+        "payload": {
+            "payment_link": {
+                "entity": {
+                    "id": provider_id,
+                    "entity": "payment_link",
+                    "amount": case.amount_at_risk,
+                    "amount_paid": case.amount_at_risk,
+                    "reference_id": payment.razorpay_payment_id,
+                    "status": "paid"
+                }
+            }
+        },
+        "created_at": int(time.time())
+    }
+    
+    await _send_webhook(paid_payload)
+    return {"status": "success"}
+
+async def _run_scenario(scenario: str, failed_payload: Dict[str, Any]):
     """Execute the sequence of webhooks for the scenario."""
     await _send_webhook(failed_payload)
     
     if scenario == "duplicate_webhook":
         await asyncio.sleep(0.5)
         await _send_webhook(failed_payload)
-        
-    if scenario in ["successful_recovery", "payment_link_recovery"]:
-        # Give the backend time to process the failure and generate the link
-        await asyncio.sleep(4)
-        await _send_webhook(paid_payload)
 
 async def _send_webhook(payload: Dict[str, Any]):
     """Send the payload to the webhook endpoint."""

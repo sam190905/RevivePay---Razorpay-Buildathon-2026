@@ -34,7 +34,7 @@ async def main():
 
         # [Test 1] Approved Action Executes Successfully (Demo Mode)
         print("[Test 1] Approved Action Executes Successfully")
-        settings.demo_mode = True
+        settings.app_mode = "developer"
         p1 = Payment(id=uuid.uuid4(), razorpay_payment_id=f"pay_p6_1_{int(datetime.now(timezone.utc).timestamp())}", customer_id=customer.id, amount=100000, currency="INR", status="failed", failure_code="GATEWAY_ERROR", failure_reason="timeout")
         c1 = RecoveryCase(id=uuid.uuid4(), payment_id=p1.id, customer_id=customer.id, amount_at_risk=100000, status="open")
         db.add(p1)
@@ -59,7 +59,7 @@ async def main():
 
         # [Test 3] Execution Failure (API Error)
         print("\n[Test 3] API Execution Failure")
-        settings.demo_mode = False # Disable demo mode to hit the actual mocked client
+        settings.app_mode = "test" # Disable developer mode to hit the actual mocked client
         
         # Mock RazorpayClient to raise an error
         async def mock_api_fail(*args, **kwargs):
@@ -95,7 +95,7 @@ async def main():
         print(" -> SUCCESS: Execution API timeout caught safely.")
         
         razorpay_client.create_payment_link = original_create
-        settings.demo_mode = True
+        settings.app_mode = "developer"
 
         # [Test 5] Successful Verification & Revenue Calculation
         print("\n[Test 5] Successful Verification")

@@ -88,7 +88,7 @@ def upgrade() -> None:
     op.create_table('recovery_actions',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('recovery_case_id', sa.UUID(), nullable=False),
-    sa.Column('action_type', sa.String(length=100), nullable=False, comment='e.g. retry_payment, create_payment_link'),
+    sa.Column('action_type', sa.String(length=100), nullable=False, comment='e.g. create_payment_link, manual_review'),
     sa.Column('status', sa.String(length=50), nullable=False),
     sa.Column('amount', sa.Integer(), nullable=True, comment='Amount in paise'),
     sa.Column('result', sa.Text(), nullable=True),

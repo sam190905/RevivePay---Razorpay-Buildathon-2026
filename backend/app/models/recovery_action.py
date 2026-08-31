@@ -25,7 +25,7 @@ class RecoveryAction(Base):
         index=True,
     )
     action_type: Mapped[str] = mapped_column(
-        String(100), nullable=False, comment="e.g. retry_payment, create_payment_link"
+        String(100), nullable=False, comment="e.g. create_payment_link, manual_review"
     )
     status: Mapped[str] = mapped_column(
         String(50), nullable=False, default="pending"

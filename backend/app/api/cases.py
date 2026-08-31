@@ -105,3 +105,48 @@ async def get_recovery_case_detail(case_id: uuid.UUID, db: AsyncSession = Depend
             for log in logs
         ]
     }
+
+@router.post("/{case_id}/sync")
+async def sync_recovery_case_status(case_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Sync a recovery case status directly from Razorpay (for local testing without webhooks)."""
+    from app.models.recovery_action import RecoveryAction
+    from app.integrations.razorpay_client import razorpay_client
+    from app.services.recovery_engine import recovery_engine
+    
+    case = await db.scalar(select(RecoveryCase).where(RecoveryCase.id == case_id))
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+        
+    action = await db.scalar(
+        select(RecoveryAction)
+        .where(RecoveryAction.recovery_case_id == case.id)
+        .order_by(RecoveryAction.executed_at.desc())
+        .limit(1)
+    )
+    
+    if not action or not action.result:
+        return {"status": "ok", "message": "No actionable result to sync"}
+        
+    import json
+    try:
+        res_dict = json.loads(action.result)
+        provider_id = res_dict.get("provider_id")
+    except:
+        provider_id = None
+        
+    if not provider_id or provider_id.startswith("plink_sim_"):
+        return {"status": "ok", "message": "Not a real payment link"}
+        
+    try:
+        link_data = await razorpay_client.fetch_payment_link(provider_id)
+        status = link_data.get("status")
+        amount_paid = link_data.get("amount_paid", 0)
+        
+        if status == "paid" or amount_paid > 0:
+            await recovery_engine.verify_recovery_result(db, case, amount_paid)
+            return {"status": "success", "message": "Status synced and updated to recovered"}
+            
+        return {"status": "ok", "message": f"Payment link status is {status}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch from Razorpay: {e}")
+

@@ -107,3 +107,13 @@ export async function triggerDemoScenario(scenario: string): Promise<any> {
   const res = await api.post("/demo/scenarios", { scenario });
   return res.data;
 }
+
+export async function simulateCustomerPayment(caseId: string): Promise<any> {
+  const res = await api.post("/demo/scenarios/simulate-payment", { case_id: caseId });
+  return res.data;
+}
+
+export async function syncPaymentStatus(caseId: string): Promise<any> {
+  const res = await api.post(`/recovery-cases/${caseId}/sync`);
+  return res.data;
+}

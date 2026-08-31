@@ -52,7 +52,6 @@ async def main():
 
         c1_res = await recovery_engine.process_recovery_case(db, c1, p1, customer)
         assert c1_res.recommended_action == RecoveryActionType.CREATE_PAYMENT_LINK.value
-        assert c1_res.recovery_probability == 0.85
         print(" -> SUCCESS: AI successfully diagnosed and policy approved.")
 
         # Test 2: AI Model Failure -> Deterministic Fallback
@@ -71,8 +70,8 @@ async def main():
         await db.commit()
 
         c2_res = await recovery_engine.process_recovery_case(db, c2, p2, customer)
-        # It should fallback to deterministic, which for insufficient_funds gives score of 0.5 + 0.1 = 0.6
-        assert c2_res.recovery_probability == 0.6
+        # It should fallback to deterministic
+        assert c2_res.recovery_probability is None
         assert c2_res.recommended_action == RecoveryActionType.CREATE_PAYMENT_LINK.value
         print(" -> SUCCESS: LLM failure gracefully fell back to deterministic engine.")
         

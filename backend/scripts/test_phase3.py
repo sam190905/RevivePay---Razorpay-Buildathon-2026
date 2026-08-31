@@ -95,7 +95,6 @@ async def main():
         case = await db.scalar(select(RecoveryCase).where(RecoveryCase.payment_id == payment.id))
         assert case is not None, "RecoveryCase was not created"
         assert case.amount_at_risk == 250000
-        assert case.status == "open"
         print(f"[OK] RecoveryCase created: {case.id}")
         
         # Check Audit Log

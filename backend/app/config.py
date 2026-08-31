@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     # --- App ---
     app_env: str = Field(default="development")
     app_debug: bool = Field(default=True)
-    demo_mode: bool = Field(default=False)
+    app_mode: str = Field(default="developer", env="APP_MODE")
     backend_url: str = Field(default="http://localhost:8000")
     frontend_url: str = Field(default="http://localhost:3000")
 
@@ -28,8 +28,11 @@ class Settings(BaseSettings):
     razorpay_webhook_secret: str = Field(default="")
 
     # --- AI / LLM ---
+    ai_provider: str = Field(default="openai")
     openai_api_key: str = Field(default="")
     openai_model: str = Field(default="gpt-4o-mini")
+    gemini_api_key: str = Field(default="")
+    gemini_model: str = Field(default="gemini-2.5-flash")
 
     model_config = {
         "env_file": ".env",

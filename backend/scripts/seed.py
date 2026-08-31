@@ -134,7 +134,7 @@ RECOVERY_CASES = [
         "recovery_probability": 0.87,
         "status": "open",
         "reason": "temporary_failure",
-        "recommended_action": "retry_payment",
+        "recommended_action": "create_payment_link",
     },
     {
         "payment_idx": 1,
@@ -148,7 +148,7 @@ RECOVERY_CASES = [
         "recovery_probability": 0.82,
         "status": "open",
         "reason": "temporary_failure",
-        "recommended_action": "retry_payment",
+        "recommended_action": "create_payment_link",
     },
     {
         "payment_idx": 3,
@@ -162,7 +162,7 @@ RECOVERY_CASES = [
         "recovery_probability": 0.91,
         "status": "open",
         "reason": "temporary_failure",
-        "recommended_action": "retry_payment",
+        "recommended_action": "create_payment_link",
     },
     {
         # A completed case to show recovered revenue
@@ -170,8 +170,8 @@ RECOVERY_CASES = [
         "recovery_probability": 0.84,
         "status": "recovered",
         "reason": "temporary_failure",
-        "recommended_action": "retry_payment",
-        "actual_action": "retry_payment",
+        "recommended_action": "create_payment_link",
+        "actual_action": "create_payment_link",
         "recovered_amount": 349900,
     },
 ]
@@ -257,7 +257,7 @@ async def seed() -> None:
                     metadata_json={
                         "classification": "temporary_failure",
                         "confidence": 0.84,
-                        "recommended_action": "retry_payment",
+                        "recommended_action": "create_payment_link",
                         "simulated": True,
                     },
                     timestamp=case.opened_at + timedelta(seconds=2),
@@ -266,10 +266,10 @@ async def seed() -> None:
                     recovery_case_id=case.id,
                     event_type="policy_check",
                     actor="policy_engine",
-                    action="Policy approved retry_payment action",
-                    status="approved",
+                    action="Policy approved create_payment_link action",
+                    status="success",
                     metadata_json={
-                        "action": "retry_payment",
+                        "action": "create_payment_link",
                         "risk_level": "low",
                         "simulated": True,
                     },
@@ -279,10 +279,10 @@ async def seed() -> None:
                     recovery_case_id=case.id,
                     event_type="action_executed",
                     actor="system",
-                    action="Payment retry executed successfully",
+                    action="Payment link created successfully",
                     status="success",
                     metadata_json={
-                        "action_type": "retry_payment",
+                        "action_type": "create_payment_link",
                         "recovered_amount": case.recovered_amount,
                         "simulated": True,
                     },

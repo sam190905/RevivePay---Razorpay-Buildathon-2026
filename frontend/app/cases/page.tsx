@@ -10,12 +10,24 @@ export default function CasesPage() {
   const [cases, setCases] = useState<RecoveryCase[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadCases = () => {
     fetchRecoveryCases()
       .then(setCases)
       .catch(console.error)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadCases();
   }, []);
+
+  useEffect(() => {
+    const hasActiveCases = cases.some((c) => c.status === "open" || c.status === "processing");
+    if (hasActiveCases) {
+      const interval = setInterval(loadCases, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [cases]);
 
   if (loading) {
     return <div className="text-gray-400 animate-pulse">Loading recovery cases...</div>;

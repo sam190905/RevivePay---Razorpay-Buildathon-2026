@@ -27,12 +27,12 @@ class ActionExecutor:
         Returns:
             dict containing status, result payload, and any errors.
         """
-        logger.info(f"Executing action {action_type} for payment {payment.id} (demo_mode={settings.demo_mode})")
+        logger.info(f"Executing action {action_type} for payment {payment.id} (app_mode={settings.app_mode})")
         
         if action_type == RecoveryActionType.CREATE_PAYMENT_LINK:
             return await self._create_payment_link(payment, customer)
         elif action_type == RecoveryActionType.MANUAL_REVIEW:
-            return {"status": "success", "result": "Routed to manual review queue.", "is_simulated": settings.demo_mode}
+            return {"status": "success", "result": "Routed to manual review queue.", "is_simulated": settings.app_mode == "developer"}
         else:
             raise ActionExecutionError(f"Unsupported action for auto-execution: {action_type}")
 
@@ -42,11 +42,11 @@ class ActionExecutor:
             logger.error("Simulating execution failure (timeout).")
             raise ActionExecutionError("Simulated execution failure: upstream API timeout")
             
-        if settings.demo_mode:
-            logger.info("Demo mode: Simulating payment link creation.")
+        if settings.app_mode == "developer":
+            logger.info("Developer mode: Simulating payment link creation.")
             return {
                 "status": "success",
-                "result": f"https://rzp.io/i/simulated_{uuid.uuid4().hex[:8]}",
+                "result": "",
                 "provider_id": f"plink_sim_{uuid.uuid4().hex[:8]}",
                 "is_simulated": True
             }

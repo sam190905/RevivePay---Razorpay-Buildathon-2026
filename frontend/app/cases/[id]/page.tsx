@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { fetchCaseDetail, CaseDetail, AuditLog } from "@/lib/api";
+import { fetchCaseDetail, CaseDetail, AuditLog, simulateCustomerPayment, syncPaymentStatus } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/badge";
 import {
@@ -21,6 +21,7 @@ import {
   Ban,
   CircleDot,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 
 /* ── helpers ─────────────────────────────────────────────────────── */
@@ -187,17 +188,32 @@ export default function CaseDetailPage() {
   const params = useParams();
   const [data, setData] = useState<CaseDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSimulatingPayment, setIsSimulatingPayment] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
-  useEffect(() => {
+  const loadData = () => {
     if (params.id) {
       fetchCaseDetail(params.id as string)
         .then(setData)
         .catch(console.error)
         .finally(() => setLoading(false));
     }
+  };
+
+  useEffect(() => {
+    loadData();
   }, [params.id]);
 
-  if (loading)
+  useEffect(() => {
+    if (!data) return;
+    const isProcessing = data.case.status === "open" || data.case.status === "processing";
+    if (isProcessing) {
+      const interval = setInterval(loadData, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [data?.case.status]);
+
+  if (loading && !data)
     return (
       <div className="flex items-center gap-3 text-gray-400 animate-pulse py-16">
         <Loader2 className="w-5 h-5 animate-spin" /> Loading case details…
@@ -230,6 +246,31 @@ export default function CaseDetailPage() {
   const aiConfidence = aiMeta?.confidence;
   const aiRecommendedAction = aiMeta?.recommended_action;
   const aiReason = aiMeta?.reason;
+
+  const handleSimulatePayment = async () => {
+    if (!data) return;
+    try {
+      setIsSimulatingPayment(true);
+      await simulateCustomerPayment(data.case.id);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSimulatingPayment(false);
+    }
+  };
+
+  const handleSyncPayment = async () => {
+    if (!data) return;
+    try {
+      setIsSyncing(true);
+      await syncPaymentStatus(data.case.id);
+      loadData();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   return (
     <div className="max-w-5xl">
@@ -268,6 +309,47 @@ export default function CaseDetailPage() {
               Recovered {formatCurrency(data.case.recovered_amount, data.payment.currency)}
             </p>
           )}
+        </div>
+      </div>
+
+      {/* ── Progress Tracker ───────────────────────────────────── */}
+      <div className="mb-8 p-6 bg-gray-900 border border-gray-800 rounded-xl">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="text-sm font-semibold flex items-center gap-2">
+            {(data.case.status === "open" || data.case.status === "processing") && !(execLog || hasPaymentLink) ? (
+              <><Loader2 className="w-4 h-4 animate-spin text-sky-400" /> AI Recovery in Progress</>
+            ) : (data.case.status === "open" || data.case.status === "processing") && (execLog || hasPaymentLink) ? (
+              <><Clock className="w-4 h-4 text-sky-400" /> Waiting for customer payment</>
+            ) : data.case.status === "recovered" || data.case.status === "partially_recovered" ? (
+              <><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Revenue Recovered</>
+            ) : data.case.status === "failed" ? (
+               <><XCircle className="w-4 h-4 text-red-400" /> Recovery Failed</>
+            ) : data.case.status === "manual_review" ? (
+               <><Ban className="w-4 h-4 text-amber-400" /> Manual Review Required</>
+            ) : (
+              "Recovery Status"
+            )}
+          </h4>
+        </div>
+        <div className="flex items-center gap-2 overflow-x-auto text-xs pb-2 scrollbar-hide">
+          {[
+            { label: "Payment Failed", status: "completed" },
+            { label: "Case Created", status: "completed" },
+            { label: "AI Diagnosis", status: aiLog ? "completed" : ((data.case.status === "open" || data.case.status === "processing") ? "processing" : "pending") },
+            { label: "Policy Check", status: policyLog ? "completed" : (aiLog && (data.case.status === "open" || data.case.status === "processing") ? "processing" : "pending") },
+            { label: "Recovery Action", status: (execLog || hasPaymentLink) ? (execLog?.status === "failed" ? "failed" : "completed") : (policyLog && (data.case.status === "open" || data.case.status === "processing") ? "processing" : "pending") },
+            { label: "Verification", status: verificationLog ? "completed" : ((execLog || hasPaymentLink) && data.case.status !== "failed" && data.case.status !== "manual_review" ? "processing" : "pending") }
+          ].map((step, i, arr) => (
+            <div key={i} className="flex items-center gap-2 flex-shrink-0">
+              <div className={`flex items-center justify-center w-6 h-6 rounded-full border ${step.status === 'completed' ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' : step.status === 'processing' ? 'bg-sky-500/20 border-sky-500/50 text-sky-400' : step.status === 'failed' ? 'bg-red-500/20 border-red-500/50 text-red-400' : 'bg-gray-800 border-gray-700 text-gray-500'}`}>
+                {step.status === 'completed' ? <CheckCircle2 className="w-4 h-4" /> : step.status === 'failed' ? <XCircle className="w-4 h-4" /> : step.status === 'processing' ? <Loader2 className="w-3 h-3 animate-spin" /> : <CircleDot className="w-3 h-3" />}
+              </div>
+              <span className={`${step.status === 'completed' ? 'text-gray-300' : step.status === 'processing' ? 'text-sky-400 font-medium' : step.status === 'failed' ? 'text-red-400 font-medium' : 'text-gray-500'}`}>
+                {step.label}
+              </span>
+              {i < arr.length - 1 && <div className="w-8 h-px bg-gray-800 mx-2" />}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -364,7 +446,7 @@ export default function CaseDetailPage() {
             <div className="mb-5 flex items-center gap-2">
               {isAISource && (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                  <Cpu className="w-3 h-3" /> AI / OpenAI
+                  <Cpu className="w-3 h-3" /> AI / Gemini
                 </span>
               )}
               {isDeterministicFallback && (
@@ -402,7 +484,7 @@ export default function CaseDetailPage() {
               <div>
                 <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Decision Source</p>
                 <p className="text-sm text-gray-300">
-                  {isAISource ? "OpenAI GPT" : isDeterministicFallback ? "Rule-based engine" : "—"}
+                  {isAISource ? "Gemini" : isDeterministicFallback ? "Rule-based engine" : "—"}
                 </p>
               </div>
             </div>
@@ -507,7 +589,19 @@ export default function CaseDetailPage() {
                           <span className="text-[11px] text-gray-500 w-20 flex-shrink-0">Provider ID</span>
                           <span className="text-xs text-gray-300 font-mono">{execMeta.provider_id}</span>
                         </div>
-                        {paymentLinkUrl && (
+                        {isSimulated && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] text-gray-500 w-20 flex-shrink-0">Mode</span>
+                            <span className="text-xs text-amber-400 font-semibold">Simulated Demo</span>
+                          </div>
+                        )}
+                        {!isRecovered && isSimulated && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] text-gray-500 w-20 flex-shrink-0">Status</span>
+                            <span className="text-xs text-sky-400 font-semibold animate-pulse">Waiting for customer payment</span>
+                          </div>
+                        )}
+                        {!isSimulated && paymentLinkUrl && (
                           <div className="flex items-center gap-2">
                             <span className="text-[11px] text-gray-500 w-20 flex-shrink-0">URL</span>
                             <span className="text-xs text-gray-300 font-mono truncate">{paymentLinkUrl}</span>
@@ -515,8 +609,26 @@ export default function CaseDetailPage() {
                         )}
                       </div>
                     </div>
-                    {paymentLinkUrl && (
+                    
+                    {!isRecovered && isSimulated && (
                       <div className="col-span-2">
+                        <button
+                          onClick={handleSimulatePayment}
+                          disabled={isSimulatingPayment}
+                          className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 rounded-lg text-sm font-medium transition-colors border border-amber-500/20 disabled:opacity-50"
+                        >
+                          {isSimulatingPayment ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <CheckCircle2 className="w-4 h-4" />
+                          )}
+                          {isSimulatingPayment ? "Simulating..." : "Simulate Customer Payment"}
+                        </button>
+                      </div>
+                    )}
+
+                    {!isSimulated && paymentLinkUrl && (
+                      <div className="col-span-2 flex items-center gap-3">
                         <a
                           href={paymentLinkUrl}
                           target="_blank"
@@ -526,6 +638,16 @@ export default function CaseDetailPage() {
                           <ExternalLink className="w-4 h-4" />
                           Open Payment Link
                         </a>
+                        {!isRecovered && (
+                          <button
+                            onClick={handleSyncPayment}
+                            disabled={isSyncing}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700 transition-colors disabled:opacity-50"
+                          >
+                            <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin" : ""}`} />
+                            {isSyncing ? "Syncing..." : "Sync Payment Status"}
+                          </button>
+                        )}
                       </div>
                     )}
                   </>

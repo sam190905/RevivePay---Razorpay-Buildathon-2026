@@ -5,9 +5,7 @@ from pydantic import BaseModel, Field
 
 class RecoveryActionType(str, Enum):
     """Fixed allowlist of recovery actions."""
-    RETRY_PAYMENT = "retry_payment"
     CREATE_PAYMENT_LINK = "create_payment_link"
-    SEND_RECOVERY_REMINDER = "send_recovery_reminder"
     MANUAL_REVIEW = "manual_review"
 
 class PolicyOutcome(str, Enum):

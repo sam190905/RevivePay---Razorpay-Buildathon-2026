@@ -50,7 +50,7 @@ class PolicyEngine:
             )
 
         # Rule 4: Action restrictions (e.g. invalid action)
-        if proposed_action not in [RecoveryActionType.CREATE_PAYMENT_LINK, RecoveryActionType.RETRY_PAYMENT]:
+        if proposed_action not in [RecoveryActionType.CREATE_PAYMENT_LINK]:
              return PolicyDecision(
                 outcome=PolicyOutcome.MANUAL_REVIEW,
                 action=RecoveryActionType.MANUAL_REVIEW,

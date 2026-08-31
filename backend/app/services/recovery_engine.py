@@ -60,6 +60,9 @@ class RecoveryEngine:
 
     async def process_recovery_case(self, db: AsyncSession, case: RecoveryCase, payment: Payment, customer: Customer) -> RecoveryCase:
         """Run the full recovery pipeline on a case."""
+        case.status = "processing"
+        await db.commit()
+
         # 1. Classification & Scoring (AI First, fallback to deterministic)
         from app.services.ai_agent import ai_agent, AIAgentError
         
