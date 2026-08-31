@@ -6,7 +6,7 @@ AI-powered revenue recovery system for Razorpay. Detects failed payments, diagno
 
 ```
 Next.js Frontend → FastAPI Backend → PostgreSQL
-                                   → AI Service (OpenAI-compatible)
+                                   → AI Service (OpenAI-compatible) or Deterministic Fallback
                                    → Razorpay Test Mode API
 ```
 
@@ -57,6 +57,24 @@ npm run dev
 
 See `.env.example` for all required configuration.
 
+## Demo Scenarios
+
+We have built a deterministic `/api/demo/scenarios` endpoint that fires synthetic webhooks. It simulates 5 core cases:
+1. **Successful Recovery** (Basic retry via payment link)
+2. **Payment Link Recovery** (Happy path through insufficient funds)
+3. **Guardrail Block** (AI blocked by deterministic policy due to high risk)
+4. **Execution Failure** (Simulated Razorpay downtime)
+5. **Duplicate Webhook** (Idempotency check validation)
+
+## Testing
+
+Backend test suite ensures stability and idempotency:
+```bash
+cd backend
+python -m scripts.test_webhook
+```
+*Note: We disable OpenAI API keys during regression testing to ensure the deterministic fallback and core policies function correctly.*
+
 ## Project Structure
 
 ```
@@ -66,14 +84,10 @@ See `.env.example` for all required configuration.
 │       ├── api/           # Route handlers
 │       ├── models/        # SQLAlchemy models
 │       ├── schemas/       # Pydantic schemas
-│       ├── services/      # Business logic
-│       ├── agents/        # AI recovery agent
-│       ├── policies/      # Deterministic guardrails
-│       ├── actions/       # Recovery action executors
+│       ├── services/      # Business logic (AI Agent, Policy Engine, Recovery Engine)
 │       ├── integrations/  # Razorpay client
-│       ├── db/            # Database config
-│       └── utils/         # Helpers
-├── scripts/           # Seed data, utilities
+│       └── db/            # Database config
+├── scripts/           # Test and utility scripts
 ├── docs/              # Architecture, API, demo docs
 └── docker-compose.yml # PostgreSQL
 ```
