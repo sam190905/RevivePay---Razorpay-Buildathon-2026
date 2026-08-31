@@ -29,7 +29,7 @@ async def trigger_demo_scenario(request: DemoScenarioRequest, background_tasks: 
         amount = 500000
     elif request.scenario == "failed_execution":
         failure_code = "GATEWAY_ERROR"
-        amount = 999999 # Special amount to trigger failure in ActionExecutor
+        amount = 499999 # Special amount to trigger failure in ActionExecutor
     elif request.scenario == "payment_link_recovery":
         failure_code = "INSUFFICIENT_FUNDS"
         failure_reason = "Insufficient funds in customer account"
@@ -54,7 +54,7 @@ async def trigger_demo_scenario(request: DemoScenarioRequest, background_tasks: 
                     "error_code": failure_code,
                     "error_description": failure_reason,
                     "email": f"demo_{uuid.uuid4().hex[:4]}@example.com",
-                    "contact": "9999999999"
+                    "contact": "9876543210"
                 }
             }
         },

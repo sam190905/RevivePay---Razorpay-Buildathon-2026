@@ -144,7 +144,10 @@ async def razorpay_webhook(request: Request, db: AsyncSession = Depends(get_db))
 
         # Step 4c: Create RecoveryCase if not exists
         recovery_case = await db.scalar(select(RecoveryCase).where(RecoveryCase.payment_id == payment.id))
+        is_new_case = False
+
         if not recovery_case and status == "failed":
+            is_new_case = True
             recovery_case = RecoveryCase(
                 payment_id=payment.id,
                 customer_id=customer.id,
@@ -165,32 +168,65 @@ async def razorpay_webhook(request: Request, db: AsyncSession = Depends(get_db))
                 metadata_json={"razorpay_event_id": event_id, "error_code": error_code}
             )
             db.add(audit_log)
+        elif recovery_case:
+            logger.info(f"Duplicate webhook for existing payment {razorpay_payment_id}. Ignoring recovery workflow.")
+            audit_log = AuditLog(
+                recovery_case_id=recovery_case.id,
+                event_type="duplicate_webhook_ignored",
+                actor="system",
+                action="Ignored duplicate payment.failed webhook",
+                status="success",
+                metadata_json={"razorpay_event_id": event_id}
+            )
+            db.add(audit_log)
             
         await db.commit()
         
         # Phase 4: Trigger the Deterministic Recovery Engine
-        from app.services.recovery_engine import recovery_engine
-        
-        try:
-            await recovery_engine.process_recovery_case(db, recovery_case, payment, customer)
-            logger.info(f"Successfully processed recovery workflow for {razorpay_payment_id}")
-        except Exception as e:
-            logger.error(f"Error processing recovery case: {e}")
+        if is_new_case:
+            from app.services.recovery_engine import recovery_engine
+            
+            try:
+                await recovery_engine.process_recovery_case(db, recovery_case, payment, customer)
+                logger.info(f"Successfully processed recovery workflow for {razorpay_payment_id}")
+            except Exception as e:
+                logger.error(f"Error processing recovery case: {e}")
             
     elif event_type == "payment_link.paid":
         logger.info(f"Received payment_link.paid event: {event_id}")
         link_data = payload.get("payload", {}).get("payment_link", {}).get("entity", {})
         reference_id = link_data.get("reference_id")
+        payment_link_id = link_data.get("id")
         amount_paid = link_data.get("amount_paid", 0)
 
-        if not reference_id:
-            logger.error("No reference_id found in payment_link.paid payload")
-            return {"status": "ok", "message": "Ignored: No reference_id"}
-
         from app.models.recovery_case import RecoveryCase
+        from app.models.recovery_action import RecoveryAction
         
-        # In our implementation, reference_id is the payment.id
-        recovery_case = await db.scalar(select(RecoveryCase).where(RecoveryCase.payment_id == reference_id))
+        recovery_case = None
+
+        # Primary lookup: match by payment_link.id in RecoveryAction.result
+        if payment_link_id:
+            # We search for a RecoveryAction that has this provider_id in its result JSON string
+            action = await db.scalar(
+                select(RecoveryAction).where(RecoveryAction.result.like(f'%"{payment_link_id}"%'))
+            )
+            if action:
+                recovery_case = await db.scalar(select(RecoveryCase).where(RecoveryCase.id == action.recovery_case_id))
+
+        # Secondary lookup: reference_id
+        if not recovery_case and reference_id:
+            logger.info(f"Fallback: finding case by reference_id {reference_id}")
+            import uuid
+            try:
+                # Try parsing as UUID (production sends payment.id)
+                ref_uuid = uuid.UUID(reference_id)
+                recovery_case = await db.scalar(select(RecoveryCase).where(RecoveryCase.payment_id == ref_uuid))
+            except ValueError:
+                # Demo mode / synthetic payload often uses razorpay_payment_id
+                from app.models.payment import Payment
+                payment = await db.scalar(select(Payment).where(Payment.razorpay_payment_id == reference_id))
+                if payment:
+                    recovery_case = await db.scalar(select(RecoveryCase).where(RecoveryCase.payment_id == payment.id))
         
         if recovery_case:
             from app.services.recovery_engine import recovery_engine
@@ -200,8 +236,11 @@ async def razorpay_webhook(request: Request, db: AsyncSession = Depends(get_db))
             except Exception as e:
                 logger.error(f"Error verifying recovery case: {e}")
         else:
-            logger.warning(f"No recovery case found for reference_id: {reference_id}")
-            
+            logger.warning(f"No recovery case found for payment_link {payment_link_id} and reference_id {reference_id}")
+
+    elif event_type == "payment.captured":
+        logger.info(f"Received payment.captured event: {event_id}. Ignored for recovery attribution as per requirements.")
+        
     else:
         logger.info(f"Unhandled event type: {event_type}")
 

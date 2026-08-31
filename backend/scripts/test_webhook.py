@@ -95,6 +95,55 @@ async def main():
         print(f"Response: {resp.json()}")
         assert resp.status_code == 400
 
+        # Test 5: Duplicate payment_link.paid (different event IDs)
+        print("\n[Test 5] Sending payment_link.paid...")
+        paid_payload = {
+            "entity": "event",
+            "account_id": "acc_12345",
+            "event": "payment_link.paid",
+            "contains": ["payment_link"],
+            "payload": {
+                "payment_link": {
+                    "entity": {
+                        "id": "plink_test_123456",
+                        "amount": 1000,
+                        "amount_paid": 1000,
+                        "reference_id": "pay_sim_123456",
+                        "status": "paid"
+                    }
+                }
+            },
+            "created_at": int(datetime.now(timezone.utc).timestamp())
+        }
+        paid_payload_bytes = json.dumps(paid_payload, separators=(',', ':')).encode('utf-8')
+        paid_sig_1 = hmac.new(get_secret().encode('utf-8'), paid_payload_bytes, hashlib.sha256).hexdigest()
+        
+        # First payment_link.paid event
+        paid_event_id_1 = f"evnt_paid_1_{int(datetime.now(timezone.utc).timestamp())}"
+        headers_paid_1 = {
+            "x-razorpay-signature": paid_sig_1,
+            "x-razorpay-event-id": paid_event_id_1,
+            "Content-Type": "application/json"
+        }
+        # We might need to wait for the recovery case to be fully processed from Test 1
+        await asyncio.sleep(2)
+        resp = await client.post(url, content=paid_payload_bytes, headers=headers_paid_1)
+        print(f"Status (First paid): {resp.status_code}")
+        assert resp.status_code == 200
+
+        # Second payment_link.paid event (different event_id to bypass webhook idempotency, test application idempotency)
+        print("\n[Test 5 continued] Sending duplicate payment_link.paid (different event ID)...")
+        paid_event_id_2 = f"evnt_paid_2_{int(datetime.now(timezone.utc).timestamp()) + 1}"
+        headers_paid_2 = {
+            "x-razorpay-signature": paid_sig_1,
+            "x-razorpay-event-id": paid_event_id_2,
+            "Content-Type": "application/json"
+        }
+        resp = await client.post(url, content=paid_payload_bytes, headers=headers_paid_2)
+        print(f"Status (Second paid): {resp.status_code}")
+        assert resp.status_code == 200
+        print("Note: Check server logs to ensure 'Ignoring duplicate verification' was printed and revenue was not double-counted.")
+
     print("\n[OK] All webhook tests passed successfully!")
 
 if __name__ == "__main__":

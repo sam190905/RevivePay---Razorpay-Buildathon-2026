@@ -86,24 +86,26 @@ Instructions:
     def _mock_diagnose(self, payment: Payment) -> AIDiagnosisResult:
         """Deterministic mock for tests/demo when API key is missing."""
         code = (payment.failure_code or "").upper()
+        reason = payment.failure_reason or payment.failure_code or "unknown"
+        
         if code == "FRAUD":
             return AIDiagnosisResult(
-                classification="fraud",
-                confidence=0.99,
+                classification=reason,
+                confidence=None,
                 recommended_action=RecoveryActionType.MANUAL_REVIEW,
                 reason="High confidence of fraudulent activity based on error code."
             )
         elif code == "GATEWAY_ERROR":
             return AIDiagnosisResult(
-                classification="temporary_failure",
-                confidence=0.85,
+                classification=reason,
+                confidence=None,
                 recommended_action=RecoveryActionType.CREATE_PAYMENT_LINK,
                 reason="Gateway timeout is likely a temporary failure."
             )
         else:
             return AIDiagnosisResult(
-                classification="insufficient_funds",
-                confidence=0.70,
+                classification=reason,
+                confidence=None,
                 recommended_action=RecoveryActionType.CREATE_PAYMENT_LINK,
                 reason="Standard payment failure, suggesting retry via payment link."
             )

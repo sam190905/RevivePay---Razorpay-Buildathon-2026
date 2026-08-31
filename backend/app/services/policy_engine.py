@@ -13,7 +13,7 @@ class PolicyEngine:
         self.risk_threshold = risk_threshold
         self.max_amount_auto = max_amount_auto
 
-    def evaluate(self, amount: int, recovery_score: float, failure_category: str, proposed_action: RecoveryActionType) -> PolicyDecision:
+    def evaluate(self, amount: int, recovery_score: float | None, failure_category: str, proposed_action: RecoveryActionType) -> PolicyDecision:
         """
         Evaluate if the proposed action is permitted based on deterministic rules.
         """
@@ -30,7 +30,7 @@ class PolicyEngine:
             )
 
         # Rule 2: Too risky / Low probability of recovery
-        if recovery_score < self.risk_threshold:
+        if recovery_score is not None and recovery_score < self.risk_threshold:
             return PolicyDecision(
                 outcome=PolicyOutcome.BLOCK,
                 action=RecoveryActionType.MANUAL_REVIEW,

@@ -32,7 +32,7 @@ class PolicyDecision(BaseModel):
 class AIDiagnosisResult(BaseModel):
     """Structured output expected from the LLM."""
     classification: str = Field(description="e.g. temporary_failure, insufficient_funds, fraud")
-    confidence: float = Field(description="Confidence score between 0.0 and 1.0", ge=0.0, le=1.0)
+    confidence: float | None = Field(default=None, description="Confidence score between 0.0 and 1.0", ge=0.0, le=1.0)
     recommended_action: RecoveryActionType = Field(description="Action recommended by the AI from the allowlist")
     reason: str = Field(description="Concise explanation for the diagnosis")
 

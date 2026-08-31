@@ -38,11 +38,11 @@ class ActionExecutor:
 
     async def _create_payment_link(self, payment: Payment, customer: Customer) -> dict[str, Any]:
         """Generate a Razorpay Payment Link for recovery."""
+        if payment.amount == 499999:
+            logger.error("Simulating execution failure (timeout).")
+            raise ActionExecutionError("Simulated execution failure: upstream API timeout")
+            
         if settings.demo_mode:
-            if payment.amount == 999999:
-                logger.error("Demo mode: Simulating execution failure (timeout).")
-                raise ActionExecutionError("Simulated execution failure: upstream API timeout")
-                
             logger.info("Demo mode: Simulating payment link creation.")
             return {
                 "status": "success",

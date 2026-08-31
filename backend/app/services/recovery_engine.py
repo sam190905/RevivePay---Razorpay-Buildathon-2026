@@ -73,11 +73,19 @@ class RecoveryEngine:
             score = ai_result.confidence
             proposed_action = ai_result.recommended_action
             
+            # Determine the actual source: real OpenAI or mock/deterministic
+            ai_actor = "system_fallback" if ai_agent.is_mock else "ai_agent"
+            ai_action = (
+                "Deterministic classification (mock AI)"
+                if ai_agent.is_mock
+                else "AI classified failure and calculated score"
+            )
+            
             db.add(AuditLog(
                 recovery_case_id=case.id,
                 event_type="ai_diagnosis",
-                actor="ai_agent",
-                action="AI classified failure and calculated score",
+                actor=ai_actor,
+                action=ai_action,
                 status="success",
                 metadata_json=ai_result.model_dump()
             ))
@@ -85,7 +93,6 @@ class RecoveryEngine:
         except AIAgentError as e:
             logger.warning(f"AI diagnosis failed, falling back to deterministic logic: {e}")
             classification = self.classify_failure(payment)
-            score = self.calculate_recovery_score(payment, classification)
             proposed_action = self.determine_action(classification)
             
             db.add(AuditLog(
@@ -94,8 +101,16 @@ class RecoveryEngine:
                 actor="system_fallback",
                 action="Deterministic classification (AI fallback)",
                 status="success",
-                metadata_json={"category": classification.failure_category, "score": score, "error": str(e)}
+                metadata_json={
+                    "classification": payment.failure_reason or payment.failure_code or "Unknown",
+                    "confidence": None,
+                    "recommended_action": proposed_action.value,
+                    "reason": "Fallback to deterministic rules.",
+                    "error": str(e)
+                }
             ))
+
+            score = None
 
         case.recovery_probability = score
 
@@ -133,7 +148,8 @@ class RecoveryEngine:
             try:
                 exec_result = await action_executor.execute(decision.action, payment, customer)
                 db_action.status = "success"
-                db_action.result = exec_result.get("result")
+                import json
+                db_action.result = json.dumps(exec_result)
                 
                 db.add(AuditLog(
                     recovery_case_id=case.id,
@@ -146,6 +162,7 @@ class RecoveryEngine:
             except ActionExecutionError as e:
                 db_action.status = "failed"
                 db_action.error = str(e)
+                case.status = "failed"
                 db.add(AuditLog(
                     recovery_case_id=case.id,
                     event_type="action_executed",
@@ -173,6 +190,10 @@ class RecoveryEngine:
         """Verify the recovery outcome and calculate recovered revenue."""
         logger.info(f"Verifying recovery result for case {case.id}")
         
+        if case.status in ["recovered", "partially_recovered"]:
+            logger.info(f"RecoveryCase {case.id} is already in {case.status} status. Ignoring duplicate verification.")
+            return case
+
         case.recovered_amount = amount_paid
         if amount_paid >= case.amount_at_risk:
             case.status = "recovered"

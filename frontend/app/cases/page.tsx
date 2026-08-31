@@ -52,8 +52,9 @@ export default function CasesPage() {
                   </td>
                 </tr>
               ) : cases.map((c) => (
-                <tr key={c.id} className="hover:bg-gray-800/50 transition-colors group">
+                <tr key={c.id} className="relative cursor-pointer hover:bg-gray-800/60 transition-colors duration-150 group focus-within:ring-1 focus-within:ring-blue-500/40">
                   <td className="px-6 py-4 whitespace-nowrap">
+                    <Link href={`/cases/${c.id}`} className="absolute inset-0 z-10 focus:outline-none" aria-label={`View case for ${c.customer_name || 'customer'}`} tabIndex={0} />
                     <div className="text-sm font-medium text-gray-200">{c.customer_name}</div>
                     <div className="text-xs text-gray-500">{c.customer_email}</div>
                   </td>
@@ -75,9 +76,9 @@ export default function CasesPage() {
                     <Badge status={c.status} />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Link href={`/cases/${c.id}`} className="text-blue-500 hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                      View details
-                    </Link>
+                    <svg className="inline-block w-4 h-4 text-gray-600 group-hover:text-blue-400 transition-colors duration-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
                   </td>
                 </tr>
               ))}
