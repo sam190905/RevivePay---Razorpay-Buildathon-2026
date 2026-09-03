@@ -30,42 +30,42 @@ function statusMeta(status: string) {
   const map: Record<string, { label: string; color: string; icon: React.ReactNode; description: string }> = {
     open: {
       label: "Open",
-      color: "text-blue-400",
-      icon: <CircleDot className="w-5 h-5 text-blue-400" />,
+      color: "text-[var(--brand)]",
+      icon: <CircleDot className="w-5 h-5 text-[var(--brand)]" />,
       description: "Case is open and awaiting processing.",
     },
     processing: {
       label: "Processing",
-      color: "text-sky-400",
-      icon: <Loader2 className="w-5 h-5 text-sky-400 animate-spin" />,
+      color: "text-[var(--brand)]",
+      icon: <Loader2 className="w-5 h-5 text-[var(--brand)] animate-spin" />,
       description: "Recovery action is being executed.",
     },
     recovered: {
       label: "Recovered",
-      color: "text-emerald-400",
-      icon: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
+      color: "text-[var(--success)]",
+      icon: <CheckCircle2 className="w-5 h-5 text-[var(--success)]" />,
       description: "Full amount has been successfully recovered.",
     },
     partially_recovered: {
       label: "Partially Recovered",
-      color: "text-lime-400",
-      icon: <CheckCircle2 className="w-5 h-5 text-lime-400" />,
+      color: "text-[var(--success)]",
+      icon: <CheckCircle2 className="w-5 h-5 text-[var(--success)]" />,
       description: "A portion of the amount has been recovered.",
     },
     failed: {
       label: "Failed",
-      color: "text-red-400",
-      icon: <XCircle className="w-5 h-5 text-red-400" />,
+      color: "text-[var(--danger)]",
+      icon: <XCircle className="w-5 h-5 text-[var(--danger)]" />,
       description: "Recovery was unsuccessful.",
     },
     manual_review: {
       label: "Manual Review",
-      color: "text-amber-400",
-      icon: <Ban className="w-5 h-5 text-amber-400" />,
+      color: "text-[var(--warning)]",
+      icon: <Ban className="w-5 h-5 text-[var(--warning)]" />,
       description: "Case requires manual review by an operator.",
     },
   };
-  return map[status] || { label: status, color: "text-gray-400", icon: <Clock className="w-5 h-5 text-gray-400" />, description: "" };
+  return map[status] || { label: status, color: "text-[var(--text-muted)]", icon: <Clock className="w-5 h-5 text-[var(--text-muted)]" />, description: "" };
 }
 
 function eventTitle(eventType: string, log: AuditLog): string {
@@ -131,17 +131,17 @@ function eventKeyValues(log: AuditLog): [string, string][] {
 }
 
 function getEventIcon(eventType: string, status: string, actor?: string) {
-  if (status === "failed") return <XCircle className="w-5 h-5 text-red-400" />;
+  if (status === "failed") return <XCircle className="w-5 h-5 text-[var(--danger)]" />;
   switch (eventType) {
-    case "case_created": return <AlertCircle className="w-5 h-5 text-blue-400" />;
+    case "case_created": return <AlertCircle className="w-5 h-5 text-[var(--brand)]" />;
     case "ai_diagnosis":
       return actor === "system_fallback"
-        ? <Cpu className="w-5 h-5 text-gray-400" />
-        : <Cpu className="w-5 h-5 text-purple-400" />;
-    case "policy_check": return <Shield className="w-5 h-5 text-amber-400" />;
-    case "action_executed": return <Zap className="w-5 h-5 text-blue-400" />;
-    case "verification": return <CheckCircle2 className="w-5 h-5 text-emerald-400" />;
-    default: return <Clock className="w-5 h-5 text-gray-400" />;
+        ? <Cpu className="w-5 h-5 text-[var(--text-muted)]" />
+        : <Cpu className="w-5 h-5 text-purple-500" />;
+    case "policy_check": return <Shield className="w-5 h-5 text-[var(--warning)]" />;
+    case "action_executed": return <Zap className="w-5 h-5 text-[var(--brand)]" />;
+    case "verification": return <CheckCircle2 className="w-5 h-5 text-[var(--success)]" />;
+    default: return <Clock className="w-5 h-5 text-[var(--text-muted)]" />;
   }
 }
 
@@ -154,13 +154,13 @@ function RawDetails({ data }: { data: any }) {
     <div className="mt-2">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-[11px] text-gray-500 hover:text-gray-300 transition-colors"
+        className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
       >
         {open ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
         {open ? "Hide raw details" : "View raw details"}
       </button>
       {open && (
-        <div className="mt-1.5 bg-gray-950 rounded border border-gray-800 p-2.5 text-[10px] font-mono text-gray-500 overflow-x-auto">
+        <div className="mt-1.5 bg-[var(--surface-overlay)] rounded border border-[var(--border-subtle)] p-2.5 text-[10px] font-mono text-[var(--text-muted)] overflow-x-auto shadow-inner">
           <pre>{JSON.stringify(data, null, 2)}</pre>
         </div>
       )}
@@ -172,8 +172,8 @@ function RawDetails({ data }: { data: any }) {
 
 function Section({ title, icon, children, className = "" }: { title: string; icon?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-gray-900 border border-gray-800 rounded-xl p-6 ${className}`}>
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-5 flex items-center gap-2">
+    <div className={`bg-[var(--surface)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm ${className}`}>
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-5 flex items-center gap-2">
         {icon}
         {title}
       </h3>
@@ -277,7 +277,7 @@ export default function CaseDetailPage() {
       {/* Navigation */}
       <Link
         href="/cases"
-        className="mb-6 inline-flex items-center text-sm text-gray-400 hover:text-white transition-colors"
+        className="mb-6 inline-flex items-center text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
       >
         <ArrowLeft className="w-4 h-4 mr-2" /> Back to Cases
       </Link>
@@ -287,25 +287,25 @@ export default function CaseDetailPage() {
         <div>
           <div className="flex items-center gap-3 mb-1">
             {sm.icon}
-            <h1 className="text-2xl font-bold text-white tracking-tight">
+            <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight">
               Case Details
             </h1>
             <Badge status={data.case.status} />
           </div>
-          <p className="text-xs text-gray-500 font-mono ml-8">{data.case.id}</p>
+          <p className="text-xs text-[var(--text-secondary)] font-mono ml-9">{data.case.id}</p>
           {sm.description && (
-            <p className="text-sm text-gray-400 mt-1.5 ml-8">{sm.description}</p>
+            <p className="text-sm text-[var(--text-muted)] mt-1.5 ml-9">{sm.description}</p>
           )}
         </div>
 
         {/* Amount at Risk callout */}
-        <div className="sm:text-right flex-shrink-0">
-          <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">Amount at Risk</p>
-          <p className="text-2xl font-semibold text-white tabular-nums">
+        <div className="sm:text-right flex-shrink-0 bg-[var(--surface)] border border-[var(--border-subtle)] p-4 rounded-xl shadow-sm">
+          <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-widest font-semibold mb-1">Amount at Risk</p>
+          <p className="text-3xl font-bold text-[var(--text-primary)] tabular-nums tracking-tight">
             {formatCurrency(data.case.amount_at_risk, data.payment.currency)}
           </p>
           {isRecovered && data.case.recovered_amount > 0 && (
-            <p className="text-sm font-medium text-emerald-400 mt-1 tabular-nums">
+            <p className="text-sm font-semibold text-[var(--success)] mt-1 tabular-nums">
               Recovered {formatCurrency(data.case.recovered_amount, data.payment.currency)}
             </p>
           )}
@@ -313,19 +313,19 @@ export default function CaseDetailPage() {
       </div>
 
       {/* ── Progress Tracker ───────────────────────────────────── */}
-      <div className="mb-8 p-6 bg-gray-900 border border-gray-800 rounded-xl">
+      <div className="mb-8 p-6 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-2xl shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-sm font-semibold flex items-center gap-2">
+          <h4 className="text-sm font-semibold flex items-center gap-2 text-[var(--text-primary)]">
             {(data.case.status === "open" || data.case.status === "processing") && !(execLog || hasPaymentLink) ? (
-              <><Loader2 className="w-4 h-4 animate-spin text-sky-400" /> AI Recovery in Progress</>
+              <><Loader2 className="w-4 h-4 animate-spin text-[var(--brand)]" /> AI Recovery in Progress</>
             ) : (data.case.status === "open" || data.case.status === "processing") && (execLog || hasPaymentLink) ? (
-              <><Clock className="w-4 h-4 text-sky-400" /> Waiting for customer payment</>
+              <><Clock className="w-4 h-4 text-[var(--brand)]" /> Waiting for customer payment</>
             ) : data.case.status === "recovered" || data.case.status === "partially_recovered" ? (
-              <><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Revenue Recovered</>
+              <><CheckCircle2 className="w-4 h-4 text-[var(--success)]" /> Revenue Recovered</>
             ) : data.case.status === "failed" ? (
-               <><XCircle className="w-4 h-4 text-red-400" /> Recovery Failed</>
+               <><XCircle className="w-4 h-4 text-[var(--danger)]" /> Recovery Failed</>
             ) : data.case.status === "manual_review" ? (
-               <><Ban className="w-4 h-4 text-amber-400" /> Manual Review Required</>
+               <><Ban className="w-4 h-4 text-[var(--warning)]" /> Manual Review Required</>
             ) : (
               "Recovery Status"
             )}
@@ -341,13 +341,13 @@ export default function CaseDetailPage() {
             { label: "Verification", status: verificationLog ? "completed" : ((execLog || hasPaymentLink) && data.case.status !== "failed" && data.case.status !== "manual_review" ? "processing" : "pending") }
           ].map((step, i, arr) => (
             <div key={i} className="flex items-center gap-2 flex-shrink-0">
-              <div className={`flex items-center justify-center w-6 h-6 rounded-full border ${step.status === 'completed' ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' : step.status === 'processing' ? 'bg-sky-500/20 border-sky-500/50 text-sky-400' : step.status === 'failed' ? 'bg-red-500/20 border-red-500/50 text-red-400' : 'bg-gray-800 border-gray-700 text-gray-500'}`}>
+              <div className={`flex items-center justify-center w-6 h-6 rounded-full border ${step.status === 'completed' ? 'bg-[var(--success)]/10 border-[var(--success)]/30 text-[var(--success)]' : step.status === 'processing' ? 'bg-[var(--brand)]/10 border-[var(--brand)]/30 text-[var(--brand)]' : step.status === 'failed' ? 'bg-[var(--danger)]/10 border-[var(--danger)]/30 text-[var(--danger)]' : 'bg-[var(--surface-overlay)] border-[var(--border-subtle)] text-[var(--text-muted)]'}`}>
                 {step.status === 'completed' ? <CheckCircle2 className="w-4 h-4" /> : step.status === 'failed' ? <XCircle className="w-4 h-4" /> : step.status === 'processing' ? <Loader2 className="w-3 h-3 animate-spin" /> : <CircleDot className="w-3 h-3" />}
               </div>
-              <span className={`${step.status === 'completed' ? 'text-gray-300' : step.status === 'processing' ? 'text-sky-400 font-medium' : step.status === 'failed' ? 'text-red-400 font-medium' : 'text-gray-500'}`}>
+              <span className={`${step.status === 'completed' ? 'text-[var(--text-primary)]' : step.status === 'processing' ? 'text-[var(--brand)] font-semibold' : step.status === 'failed' ? 'text-[var(--danger)] font-semibold' : 'text-[var(--text-muted)]'}`}>
                 {step.label}
               </span>
-              {i < arr.length - 1 && <div className="w-8 h-px bg-gray-800 mx-2" />}
+              {i < arr.length - 1 && <div className="w-8 h-px bg-[var(--border-subtle)] mx-2" />}
             </div>
           ))}
         </div>
@@ -355,13 +355,13 @@ export default function CaseDetailPage() {
 
       {/* ── Recovery Outcome Banner ─────────────────────────────── */}
       {isRecovered && verificationLog && (
-        <div className="mb-8 bg-emerald-500/5 border border-emerald-500/20 rounded-xl px-6 py-4 flex items-start gap-4">
-          <CheckCircle2 className="w-6 h-6 text-emerald-400 mt-0.5 flex-shrink-0" />
+        <div className="mb-8 bg-[var(--success)]/10 border border-[var(--success)]/30 rounded-xl px-6 py-4 flex items-start gap-4">
+          <CheckCircle2 className="w-6 h-6 text-[var(--success)] mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-emerald-300">
+            <p className="text-sm font-bold text-[var(--success)]">
               {data.case.status === "recovered" ? "Fully Recovered" : "Partially Recovered"} — {formatCurrency(data.case.recovered_amount, data.payment.currency)}
             </p>
-            <p className="text-xs text-emerald-400/70 mt-1">
+            <p className="text-xs text-[var(--text-primary)] mt-1 opacity-90">
               Recovery was verified after the payment link was paid. Revenue has been confirmed and attributed to this case.
             </p>
           </div>
@@ -369,11 +369,11 @@ export default function CaseDetailPage() {
       )}
 
       {data.case.status === "failed" && (
-        <div className="mb-8 bg-red-500/5 border border-red-500/20 rounded-xl px-6 py-4 flex items-start gap-4">
-          <XCircle className="w-6 h-6 text-red-400 mt-0.5 flex-shrink-0" />
+        <div className="mb-8 bg-[var(--danger)]/10 border border-[var(--danger)]/30 rounded-xl px-6 py-4 flex items-start gap-4">
+          <XCircle className="w-6 h-6 text-[var(--danger)] mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-red-300">Recovery Failed</p>
-            <p className="text-xs text-red-400/70 mt-1">
+            <p className="text-sm font-bold text-[var(--danger)]">Recovery Failed</p>
+            <p className="text-xs text-[var(--text-primary)] mt-1 opacity-90">
               The recovery action could not be completed. See the timeline below for details.
             </p>
           </div>
@@ -381,11 +381,11 @@ export default function CaseDetailPage() {
       )}
 
       {data.case.status === "manual_review" && (
-        <div className="mb-8 bg-amber-500/5 border border-amber-500/20 rounded-xl px-6 py-4 flex items-start gap-4">
-          <Ban className="w-6 h-6 text-amber-400 mt-0.5 flex-shrink-0" />
+        <div className="mb-8 bg-[var(--warning)]/10 border border-[var(--warning)]/30 rounded-xl px-6 py-4 flex items-start gap-4">
+          <Ban className="w-6 h-6 text-[var(--warning)] mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-amber-300">Requires Manual Review</p>
-            <p className="text-xs text-amber-400/70 mt-1">
+            <p className="text-sm font-bold text-[var(--warning)]">Requires Manual Review</p>
+            <p className="text-xs text-[var(--text-primary)] mt-1 opacity-90">
               Policy engine blocked automatic recovery. This case needs manual review by an operator.
             </p>
           </div>
@@ -400,39 +400,39 @@ export default function CaseDetailPage() {
           <Section title="Overview">
             <div className="grid grid-cols-2 gap-x-6 gap-y-5">
               <div>
-                <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Customer</p>
-                <p className="text-sm text-gray-200 font-medium">{data.customer.name}</p>
+                <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Customer</p>
+                <p className="text-sm text-[var(--text-primary)] font-semibold">{data.customer.name}</p>
                 {data.customer.email && (
-                  <p className="text-xs text-gray-400 mt-0.5">{data.customer.email}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{data.customer.email}</p>
                 )}
                 {data.customer.phone && (
-                  <p className="text-xs text-gray-400 mt-0.5">{data.customer.phone}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{data.customer.phone}</p>
                 )}
               </div>
               <div>
-                <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Razorpay Payment ID</p>
-                <p className="text-sm text-gray-200 font-mono">{data.payment.razorpay_payment_id}</p>
+                <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Razorpay Payment ID</p>
+                <p className="text-sm text-[var(--text-primary)] font-mono">{data.payment.razorpay_payment_id}</p>
               </div>
               <div>
-                <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Failure Reason</p>
-                <p className="text-sm text-gray-200">{data.payment.failure_reason || "—"}</p>
+                <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Failure Reason</p>
+                <p className="text-sm text-[var(--text-primary)]">{data.payment.failure_reason || "—"}</p>
                 {data.payment.failure_code && (
-                  <p className="text-xs text-red-400/70 font-mono mt-0.5">{data.payment.failure_code}</p>
+                  <p className="text-xs text-[var(--danger)]/80 font-mono mt-0.5">{data.payment.failure_code}</p>
                 )}
               </div>
               <div>
-                <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Recovered Amount</p>
-                <p className={`text-sm font-medium tabular-nums ${data.case.recovered_amount > 0 ? "text-emerald-400" : "text-gray-400"}`}>
+                <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Recovered Amount</p>
+                <p className={`text-sm font-bold tabular-nums ${data.case.recovered_amount > 0 ? "text-[var(--success)]" : "text-[var(--text-muted)]"}`}>
                   {formatCurrency(data.case.recovered_amount, data.payment.currency)}
                 </p>
               </div>
               <div>
-                <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Opened</p>
-                <p className="text-sm text-gray-200">{new Date(data.case.opened_at).toLocaleString()}</p>
+                <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Opened</p>
+                <p className="text-sm text-[var(--text-primary)]">{new Date(data.case.opened_at).toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Payment Method</p>
-                <p className="text-sm text-gray-200 capitalize">{data.payment.status}</p>
+                <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Payment Method</p>
+                <p className="text-sm text-[var(--text-primary)] capitalize">{data.payment.status}</p>
               </div>
             </div>
           </Section>
@@ -440,17 +440,17 @@ export default function CaseDetailPage() {
           {/* ── AI Diagnosis Card ──────────────────────────────── */}
           <Section
             title="AI Diagnosis"
-            icon={<Cpu className={`w-4 h-4 ${isAISource ? "text-purple-400" : "text-gray-500"}`} />}
+            icon={<Cpu className={`w-4 h-4 ${isAISource ? "text-purple-500" : "text-[var(--text-muted)]"}`} />}
           >
             {/* Decision source badge */}
             <div className="mb-5 flex items-center gap-2">
               {isAISource && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-purple-500/10 text-purple-500 border border-purple-500/20">
                   <Cpu className="w-3 h-3" /> AI / Gemini
                 </span>
               )}
               {isDeterministicFallback && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gray-500/10 text-gray-400 border border-gray-500/20">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[var(--surface-overlay)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
                   <Cpu className="w-3 h-3" /> Deterministic Fallback
                 </span>
               )}
@@ -458,19 +458,19 @@ export default function CaseDetailPage() {
 
             <div className="grid grid-cols-2 gap-x-6 gap-y-4">
               <div>
-                <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Classification</p>
-                <p className="text-sm text-white font-medium">{aiClassification || data.case.reason || "Not available"}</p>
+                <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Classification</p>
+                <p className="text-sm text-[var(--text-primary)] font-semibold">{aiClassification || data.case.reason || "Not available"}</p>
               </div>
               <div>
-                <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Confidence</p>
+                <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Confidence</p>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm text-white font-medium tabular-nums">
+                  <p className="text-sm text-[var(--text-primary)] font-bold tabular-nums">
                     {typeof aiConfidence === "number" ? `${(aiConfidence * 100).toFixed(0)}%` : "Not available"}
                   </p>
                   {typeof aiConfidence === "number" && (
-                    <div className="flex-1 max-w-[80px] h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                    <div className="flex-1 max-w-[80px] h-1.5 bg-[var(--border-subtle)] rounded-full overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-purple-400/60"
+                        className="h-full rounded-full bg-purple-500"
                         style={{ width: `${Math.min(aiConfidence * 100, 100)}%` }}
                       />
                     </div>
@@ -478,12 +478,12 @@ export default function CaseDetailPage() {
                 </div>
               </div>
               <div>
-                <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Recommended Action</p>
-                <p className="text-sm text-purple-300 font-medium font-mono">{aiRecommendedAction || "Not available"}</p>
+                <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Recommended Action</p>
+                <p className="text-sm text-purple-500 font-bold font-mono">{aiRecommendedAction || "Not available"}</p>
               </div>
               <div>
-                <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Decision Source</p>
-                <p className="text-sm text-gray-300">
+                <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Decision Source</p>
+                <p className="text-sm text-[var(--text-primary)]">
                   {isAISource ? "Gemini" : isDeterministicFallback ? "Rule-based engine" : "—"}
                 </p>
               </div>
@@ -491,32 +491,32 @@ export default function CaseDetailPage() {
 
             {/* Policy outcome */}
             {policyLog && (
-              <div className="mt-5 pt-5 border-t border-gray-800">
+              <div className="mt-5 pt-5 border-t border-[var(--border-subtle)]">
                 <div className="flex items-center gap-2 mb-3">
-                  <Shield className="w-4 h-4 text-amber-400" />
-                  <p className="text-[11px] text-gray-500 uppercase tracking-wider font-semibold">Policy Decision</p>
+                  <Shield className="w-4 h-4 text-[var(--warning)]" />
+                  <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider font-bold">Policy Decision</p>
                 </div>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                   <div>
-                    <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Outcome</p>
-                    <p className={`text-sm font-semibold ${policyLog.metadata_json?.outcome === "APPROVE" ? "text-emerald-400" : "text-amber-400"}`}>
+                    <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Outcome</p>
+                    <p className={`text-sm font-bold ${policyLog.metadata_json?.outcome === "APPROVE" ? "text-[var(--success)]" : "text-[var(--warning)]"}`}>
                       {policyLog.metadata_json?.outcome || "—"}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Risk Level</p>
-                    <p className="text-sm text-gray-300">{policyLog.metadata_json?.risk_level || "—"}</p>
+                    <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Risk Level</p>
+                    <p className="text-sm text-[var(--text-primary)] font-medium">{policyLog.metadata_json?.risk_level || "—"}</p>
                   </div>
                   {policyLog.metadata_json?.reason && (
                     <div className="col-span-2">
-                      <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Reason</p>
-                      <p className="text-sm text-gray-300">{policyLog.metadata_json.reason}</p>
+                      <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Reason</p>
+                      <p className="text-sm text-[var(--text-primary)]">{policyLog.metadata_json.reason}</p>
                     </div>
                   )}
                   {policyLog.metadata_json?.violated_rule && (
                     <div className="col-span-2">
-                      <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Violated Rule</p>
-                      <p className="text-sm text-red-400 font-mono">{policyLog.metadata_json.violated_rule}</p>
+                      <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Violated Rule</p>
+                      <p className="text-sm text-[var(--danger)] font-mono font-bold">{policyLog.metadata_json.violated_rule}</p>
                     </div>
                   )}
                 </div>
@@ -530,24 +530,24 @@ export default function CaseDetailPage() {
           {(execLog || hasPaymentLink) && (
             <Section
               title="Recovery Action"
-              icon={<Zap className="w-4 h-4 text-blue-400" />}
+              icon={<Zap className="w-4 h-4 text-[var(--brand)]" />}
             >
               <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                 <div>
-                  <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Action</p>
-                  <p className="text-sm text-blue-400 font-medium font-mono">
+                  <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Action</p>
+                  <p className="text-sm text-[var(--brand)] font-bold font-mono">
                     {data.case.actual_action?.toUpperCase() || "—"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Execution Status</p>
+                  <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Execution Status</p>
                   <div className="flex items-center gap-2">
                     {execLog?.status === "success" ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <CheckCircle2 className="w-4 h-4 text-[var(--success)]" />
                     ) : (
-                      <XCircle className="w-4 h-4 text-red-400" />
+                      <XCircle className="w-4 h-4 text-[var(--danger)]" />
                     )}
-                    <p className={`text-sm font-medium ${execLog?.status === "success" ? "text-emerald-400" : "text-red-400"}`}>
+                    <p className={`text-sm font-bold ${execLog?.status === "success" ? "text-[var(--success)]" : "text-[var(--danger)]"}`}>
                       {execLog?.status === "success" ? "Success" : "Failed"}
                     </p>
                   </div>
@@ -555,26 +555,26 @@ export default function CaseDetailPage() {
 
                 {/* Mode badge */}
                 <div>
-                  <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Mode</p>
+                  <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Mode</p>
                   {isSimulated && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-gray-800 text-gray-400 border border-gray-700">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[var(--surface-overlay)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
                       Simulated Demo
                     </span>
                   )}
                   {isRealTestMode && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[var(--brand)]/10 text-[var(--brand)] border border-[var(--brand)]/20">
                       Real Test Mode
                     </span>
                   )}
                   {!isSimulated && !isRealTestMode && (
-                    <span className="text-sm text-gray-400">—</span>
+                    <span className="text-sm text-[var(--text-muted)]">—</span>
                   )}
                 </div>
 
                 {/* Recovered amount */}
                 <div>
-                  <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Recovered Amount</p>
-                  <p className={`text-sm font-medium tabular-nums ${data.case.recovered_amount > 0 ? "text-emerald-400" : "text-gray-400"}`}>
+                  <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Recovered Amount</p>
+                  <p className={`text-sm font-bold tabular-nums ${data.case.recovered_amount > 0 ? "text-[var(--success)]" : "text-[var(--text-muted)]"}`}>
                     {formatCurrency(data.case.recovered_amount, data.payment.currency)}
                   </p>
                 </div>
@@ -582,29 +582,29 @@ export default function CaseDetailPage() {
                 {/* Payment Link details */}
                 {hasPaymentLink && (
                   <>
-                    <div className="col-span-2 border-t border-gray-800 pt-4 mt-1">
-                      <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-2">Payment Link Details</p>
+                    <div className="col-span-2 border-t border-[var(--border-subtle)] pt-4 mt-1">
+                      <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-2">Payment Link Details</p>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] text-gray-500 w-20 flex-shrink-0">Provider ID</span>
-                          <span className="text-xs text-gray-300 font-mono">{execMeta.provider_id}</span>
+                          <span className="text-[11px] text-[var(--text-secondary)] w-20 flex-shrink-0">Provider ID</span>
+                          <span className="text-xs text-[var(--text-primary)] font-mono">{execMeta.provider_id}</span>
                         </div>
                         {isSimulated && (
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] text-gray-500 w-20 flex-shrink-0">Mode</span>
-                            <span className="text-xs text-amber-400 font-semibold">Simulated Demo</span>
+                            <span className="text-[11px] text-[var(--text-secondary)] w-20 flex-shrink-0">Mode</span>
+                            <span className="text-xs text-[var(--warning)] font-semibold">Simulated Demo</span>
                           </div>
                         )}
                         {!isRecovered && isSimulated && (
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] text-gray-500 w-20 flex-shrink-0">Status</span>
-                            <span className="text-xs text-sky-400 font-semibold animate-pulse">Waiting for customer payment</span>
+                            <span className="text-[11px] text-[var(--text-secondary)] w-20 flex-shrink-0">Status</span>
+                            <span className="text-xs text-[var(--brand)] font-semibold animate-pulse">Waiting for customer payment</span>
                           </div>
                         )}
                         {!isSimulated && paymentLinkUrl && (
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] text-gray-500 w-20 flex-shrink-0">URL</span>
-                            <span className="text-xs text-gray-300 font-mono truncate">{paymentLinkUrl}</span>
+                            <span className="text-[11px] text-[var(--text-secondary)] w-20 flex-shrink-0">URL</span>
+                            <span className="text-xs text-[var(--text-primary)] font-mono truncate">{paymentLinkUrl}</span>
                           </div>
                         )}
                       </div>
@@ -615,7 +615,7 @@ export default function CaseDetailPage() {
                         <button
                           onClick={handleSimulatePayment}
                           disabled={isSimulatingPayment}
-                          className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 rounded-lg text-sm font-medium transition-colors border border-amber-500/20 disabled:opacity-50"
+                          className="flex items-center gap-2 px-4 py-2 bg-[var(--warning)]/10 text-[var(--warning)] hover:bg-[var(--warning)]/20 rounded-lg text-sm font-semibold transition-colors border border-[var(--warning)]/20 disabled:opacity-50"
                         >
                           {isSimulatingPayment ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -633,7 +633,7 @@ export default function CaseDetailPage() {
                           href={paymentLinkUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-[var(--brand)]/10 text-[var(--brand)] border border-[var(--brand)]/20 hover:bg-[var(--brand)]/20 transition-colors"
                         >
                           <ExternalLink className="w-4 h-4" />
                           Open Payment Link
@@ -642,7 +642,7 @@ export default function CaseDetailPage() {
                           <button
                             onClick={handleSyncPayment}
                             disabled={isSyncing}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700 transition-colors disabled:opacity-50"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-[var(--surface-overlay)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-[var(--border-subtle)] transition-colors disabled:opacity-50"
                           >
                             <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin" : ""}`} />
                             {isSyncing ? "Syncing..." : "Sync Payment Status"}
@@ -656,8 +656,8 @@ export default function CaseDetailPage() {
                 {/* Execution error */}
                 {execLog?.status === "failed" && execMeta?.error && (
                   <div className="col-span-2 mt-1">
-                    <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">Error</p>
-                    <p className="text-sm text-red-400 font-mono break-all">{execMeta.error}</p>
+                    <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider mb-1">Error</p>
+                    <p className="text-sm text-[var(--danger)] font-mono break-all">{execMeta.error}</p>
                   </div>
                 )}
               </div>
@@ -667,41 +667,41 @@ export default function CaseDetailPage() {
 
         {/* ── Audit Timeline (right column) ─────────────────────── */}
         <div>
-          <Section title="Audit Timeline" className="sticky top-6">
-            <div className="relative border-l border-gray-800 ml-2.5 space-y-5">
+          <Section title="Audit Timeline" className="sticky top-24">
+            <div className="relative border-l border-[var(--border-subtle)] ml-2.5 space-y-6">
               {data.audit_logs.map((log) => {
                 const kvs = eventKeyValues(log);
                 return (
                   <div key={log.id} className="relative pl-6">
                     {/* icon dot */}
-                    <div className="absolute -left-[13px] top-0 bg-gray-900 rounded-full p-0.5 border border-gray-800">
+                    <div className="absolute -left-[14px] top-0 bg-[var(--surface)] rounded-full p-0.5 border border-[var(--border-subtle)]">
                       {getEventIcon(log.event_type, log.status, log.actor)}
                     </div>
 
                     {/* title */}
-                    <p className="text-[13px] font-semibold text-gray-200 leading-tight">
+                    <p className="text-sm font-bold text-[var(--text-primary)] leading-tight">
                       {eventTitle(log.event_type, log)}
                     </p>
 
                     {/* time + actor */}
-                    <p className="text-[11px] text-gray-500 mt-0.5">
+                    <p className="text-[11px] text-[var(--text-secondary)] mt-1 font-medium">
                       {new Date(log.timestamp).toLocaleString()}
                       <span className="mx-1.5">·</span>
-                      <span className="text-gray-500">{log.actor === "system_fallback" ? "deterministic engine" : log.actor}</span>
+                      <span className="text-[var(--text-muted)]">{log.actor === "system_fallback" ? "deterministic engine" : log.actor}</span>
                     </p>
 
                     {/* description */}
-                    <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">
+                    <p className="text-xs text-[var(--text-secondary)] mt-2 leading-relaxed">
                       {eventDescription(log)}
                     </p>
 
                     {/* inline key-values */}
                     {kvs.length > 0 && (
-                      <div className="mt-2 space-y-1">
+                      <div className="mt-3 space-y-1 bg-[var(--surface-overlay)] p-2.5 rounded-lg border border-[var(--border-subtle)] shadow-inner">
                         {kvs.map(([k, v]) => (
-                          <div key={k} className="flex items-center gap-2 text-[11px]">
-                            <span className="text-gray-500">{k}:</span>
-                            <span className="text-gray-300 font-mono truncate">{v}</span>
+                          <div key={k} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-[11px]">
+                            <span className="text-[var(--text-muted)] font-medium uppercase tracking-wider w-20 flex-shrink-0">{k}</span>
+                            <span className="text-[var(--text-primary)] font-mono truncate font-semibold">{v}</span>
                           </div>
                         ))}
                       </div>

@@ -7,18 +7,18 @@ export function cn(...inputs: ClassValue[]) {
 
 export function Badge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    open: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    processing: "bg-sky-500/10 text-sky-400 border-sky-500/20",
-    manual_review: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    recovered: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    partially_recovered: "bg-lime-500/10 text-lime-400 border-lime-500/20",
-    failed: "bg-red-500/10 text-red-400 border-red-500/20",
+    open: "bg-[var(--brand)]/10 text-[var(--brand)] border-[var(--brand)]/20",
+    processing: "bg-[var(--brand)]/10 text-[var(--brand)] border-[var(--brand)]/20",
+    manual_review: "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20",
+    recovered: "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20",
+    partially_recovered: "bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20",
+    failed: "bg-[var(--danger)]/10 text-[var(--danger)] border-[var(--danger)]/20",
   };
   
-  const style = styles[status] || "bg-gray-500/10 text-gray-400 border-gray-500/20";
+  const style = styles[status] || "bg-[var(--border-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)]";
   
   return (
-    <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border uppercase tracking-wider", style)}>
+    <span className={cn("inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-widest", style)}>
       {status.replaceAll("_", " ")}
     </span>
   );

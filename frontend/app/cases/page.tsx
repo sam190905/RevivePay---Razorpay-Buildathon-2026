@@ -37,58 +37,61 @@ export default function CasesPage() {
     <div>
       <div className="mb-8 flex justify-between items-end">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Recovery Cases</h1>
-          <p className="mt-1 text-sm text-gray-400">All failed payments tracked by RevivePay</p>
+          <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight flex items-center gap-2">
+            Recovery Cases
+            <span className="text-[var(--brand)]">✦</span>
+          </h1>
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">All failed payments tracked by RevivePay</p>
         </div>
       </div>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      <div className="bg-[var(--surface)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-800">
-            <thead className="bg-gray-900/50">
+          <table className="min-w-full divide-y divide-[var(--border-subtle)]">
+            <thead className="bg-[var(--surface-overlay)]">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Customer</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Amount</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Failure</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Score</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Action</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-right text-xs font-medium text-gray-400 uppercase tracking-wider"></th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Customer</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Amount</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Failure</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Score</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Action</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-right text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800 bg-transparent">
+            <tbody className="divide-y divide-[var(--border-subtle)] bg-transparent">
               {cases.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500 text-sm">
+                  <td colSpan={7} className="px-6 py-12 text-center text-[var(--text-muted)] text-sm">
                     No recovery cases found.
                   </td>
                 </tr>
               ) : cases.map((c) => (
-                <tr key={c.id} className="relative cursor-pointer hover:bg-gray-800/60 transition-colors duration-150 group focus-within:ring-1 focus-within:ring-blue-500/40">
+                <tr key={c.id} className="relative cursor-pointer hover:bg-[var(--border-subtle)]/50 transition-all duration-200 group focus-within:ring-1 focus-within:ring-[var(--brand)]/40">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Link href={`/cases/${c.id}`} className="absolute inset-0 z-10 focus:outline-none" aria-label={`View case for ${c.customer_name || 'customer'}`} tabIndex={0} />
-                    <div className="text-sm font-medium text-gray-200">{c.customer_name}</div>
-                    <div className="text-xs text-gray-500">{c.customer_email}</div>
+                    <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--brand)] transition-colors">{c.customer_name}</div>
+                    <div className="text-xs text-[var(--text-secondary)]">{c.customer_email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-white">{formatCurrency(c.amount, c.currency)}</div>
+                    <div className="text-sm font-bold text-[var(--text-primary)] tabular-nums">{formatCurrency(c.amount, c.currency)}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)] font-medium">
                     {c.failure_reason}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-300">
+                    <div className="text-sm font-semibold text-[var(--text-primary)]">
                         {c.recovery_probability !== null ? `${(c.recovery_probability * 100).toFixed(0)}%` : '—'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-xs text-gray-400">{c.actual_action || '—'}</div>
+                    <div className="text-xs font-medium text-[var(--text-secondary)]">{c.actual_action || '—'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Badge status={c.status} />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <svg className="inline-block w-4 h-4 text-gray-600 group-hover:text-blue-400 transition-colors duration-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <svg className="inline-block w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--brand)] group-hover:translate-x-1 transition-all duration-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
                   </td>

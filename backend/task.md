@@ -1,0 +1,9 @@
+- [x] Update `backend/app/config.py` with `app_mode`
+- [x] Update `backend/.env` with `APP_MODE=developer`
+- [x] Update `backend/app/services/ai_agent.py` to check `app_mode == "developer"`
+- [x] Update `backend/app/services/action_executor.py` to check `app_mode == "developer"`
+- [x] Update `backend/app/services/recovery_engine.py` to set status to `processing` early and leave it as `processing` if action is executed
+- [x] Update `frontend/app/cases/page.tsx` with polling
+- [x] Update `frontend/app/cases/[id]/page.tsx` with polling, animated progress UI, and step indicator
+- [x] Run backend tests and manually verify Developer Mode, Test Mode, Gemini Mode, Guardrail Mode, and Execution Failure behavior
+- [x] Create walkthrough artifact

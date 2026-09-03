@@ -1,31 +1,145 @@
 @import "tailwindcss";
 
-:root {
-  --color-brand: #3b82f6;
-  --color-brand-dark: #2563eb;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-surface: #111827;
-  --color-surface-raised: #1f2937;
-  --color-surface-overlay: #374151;
-  --color-border: #374151;
-  --color-text-primary: #f9fafb;
-  --color-text-secondary: #9ca3af;
-  --color-text-muted: #6b7280;
+@theme {
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-overlay: var(--surface-overlay);
+  
+  --color-border-subtle: var(--border-subtle);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-bg-base: var(--bg-base);
+  
+  --shadow-glow: 0 0 20px -5px var(--glow-color);
 }
 
-/* Scrollbar styling for dark theme */
+:root {
+  /* LIGHT MODE (default) - Cloud/Sky Theme */
+  --bg-base: #f0f9ff;
+  --surface: rgba(255, 255, 255, 0.75);
+  --surface-raised: rgba(255, 255, 255, 0.85);
+  --surface-overlay: rgba(255, 255, 255, 0.95);
+  
+  --brand: #2563eb;
+  --brand-dark: #1d4ed8;
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+  
+  --border-subtle: rgba(148, 163, 184, 0.2);
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  
+  --glow-color: rgba(37, 99, 235, 0.05);
+}
+
+.dark {
+  /* DARK MODE - Star/Night Theme */
+  --bg-base: #020617;
+  --surface: rgba(15, 23, 42, 0.6);
+  --surface-raised: rgba(30, 41, 59, 0.8);
+  --surface-overlay: rgba(15, 23, 42, 0.95);
+  
+  --brand: #3b82f6;
+  --brand-dark: #2563eb;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  
+  --border-subtle: rgba(51, 65, 85, 0.6);
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+  
+  --glow-color: rgba(59, 130, 246, 0.15);
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  transition: background-color 0.5s ease, color 0.5s ease;
+  position: relative;
+}
+
+body::before, body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+/* Light Mode: Sky and Soft Clouds */
+body::before {
+  background: 
+    radial-gradient(ellipse at 15% 10%, rgba(255, 255, 255, 0.8) 0%, transparent 40%),
+    radial-gradient(ellipse at 85% 20%, rgba(255, 255, 255, 0.7) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% -5%, rgba(255, 255, 255, 0.9) 0%, transparent 50%),
+    linear-gradient(180deg, #e0f2fe 0%, transparent 30%, transparent 100%);
+  opacity: 1;
+}
+
+.dark body::before {
+  opacity: 0;
+}
+
+/* Dark Mode: Deep Night and Subtle Stars */
+body::after {
+  background-image: 
+    radial-gradient(1.5px 1.5px at 10% 20%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 40% 60%, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(2px 2px at 80% 30%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 30% 90%, rgba(255, 255, 255, 0.3), transparent),
+    radial-gradient(1.5px 1.5px at 90% 80%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 60% 10%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(circle at 50% -10%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
+  background-size: 
+    300px 300px, 
+    200px 200px, 
+    400px 400px, 
+    150px 150px, 
+    350px 350px, 
+    250px 250px,
+    100% 100%;
+  opacity: 0;
+}
+
+.dark body::after {
+  opacity: 1;
+}
+
+/* Ensure backdrop blur works nicely on cards */
+.bg-\[var\(--surface\)\] {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-surface);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-surface-overlay);
+  background: var(--border-subtle);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #4b5563;
+  background: var(--text-muted);
 }
