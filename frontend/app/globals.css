@@ -25,9 +25,9 @@
 :root {
   /* LIGHT MODE (default) - Cloud/Sky Theme */
   --bg-base: #f0f9ff;
-  --surface: rgba(255, 255, 255, 0.75);
-  --surface-raised: rgba(255, 255, 255, 0.85);
-  --surface-overlay: rgba(255, 255, 255, 0.95);
+  --surface: rgba(255, 255, 255, 0.65);
+  --surface-raised: rgba(255, 255, 255, 0.75);
+  --surface-overlay: rgba(255, 255, 255, 0.85);
   
   --brand: #2563eb;
   --brand-dark: #1d4ed8;
@@ -35,7 +35,7 @@
   --warning: #d97706;
   --danger: #dc2626;
   
-  --border-subtle: rgba(148, 163, 184, 0.2);
+  --border-subtle: rgba(255, 255, 255, 0.70);
   
   --text-primary: #0f172a;
   --text-secondary: #475569;
@@ -47,9 +47,9 @@
 .dark {
   /* DARK MODE - Star/Night Theme */
   --bg-base: #020617;
-  --surface: rgba(15, 23, 42, 0.6);
-  --surface-raised: rgba(30, 41, 59, 0.8);
-  --surface-overlay: rgba(15, 23, 42, 0.95);
+  --surface: rgba(15, 23, 42, 0.50);
+  --surface-raised: rgba(30, 41, 59, 0.60);
+  --surface-overlay: rgba(15, 23, 42, 0.80);
   
   --brand: #3b82f6;
   --brand-dark: #2563eb;
@@ -57,7 +57,7 @@
   --warning: #f59e0b;
   --danger: #ef4444;
   
-  --border-subtle: rgba(51, 65, 85, 0.6);
+  --border-subtle: rgba(255, 255, 255, 0.1);
   
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
@@ -87,11 +87,12 @@ body::before, body::after {
 
 /* Light Mode: Sky and Soft Clouds */
 body::before {
-  background: 
-    radial-gradient(ellipse at 15% 10%, rgba(255, 255, 255, 0.8) 0%, transparent 40%),
-    radial-gradient(ellipse at 85% 20%, rgba(255, 255, 255, 0.7) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% -5%, rgba(255, 255, 255, 0.9) 0%, transparent 50%),
-    linear-gradient(180deg, #e0f2fe 0%, transparent 30%, transparent 100%);
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.6)),
+    url('/sky-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   opacity: 1;
 }
 
@@ -126,8 +127,18 @@ body::after {
 
 /* Ensure backdrop blur works nicely on cards */
 .bg-\[var\(--surface\)\] {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 8px 32px rgba(0, 0, 0, 0.04);
+}
+
+.dark .bg-\[var\(--surface\)\] {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.bg-\[var\(--surface-overlay\)\] {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 ::-webkit-scrollbar {

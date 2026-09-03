@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, or_, cast, String, func
 from sqlalchemy.orm import joinedload
 import uuid
 
@@ -11,6 +11,75 @@ from app.models.customer import Customer
 from app.models.audit_log import AuditLog
 
 router = APIRouter()
+
+
+@router.get("/search")
+async def search_recovery_cases(
+    q: str = Query("", min_length=0, description="Search query"),
+    db: AsyncSession = Depends(get_db),
+):
+    """Search recovery cases across customer name, email, payment ID, status, amount, and failure reason."""
+    q = q.strip()
+    if not q:
+        return []
+
+    pattern = f"%{q}%"
+
+    # Build OR conditions for text-based ILIKE search
+    conditions = [
+        Customer.name.ilike(pattern),
+        Customer.email.ilike(pattern),
+        Payment.razorpay_payment_id.ilike(pattern),
+        RecoveryCase.status.ilike(pattern),
+        Payment.failure_reason.ilike(pattern),
+        Payment.failure_code.ilike(pattern),
+        RecoveryCase.recommended_action.ilike(pattern),
+        RecoveryCase.actual_action.ilike(pattern),
+    ]
+
+    # If query looks like a UUID, also try exact case ID match
+    try:
+        query_uuid = uuid.UUID(q)
+        conditions.append(RecoveryCase.id == query_uuid)
+    except ValueError:
+        pass
+
+    # If query is numeric, try matching amount in paise (user might type "1000" for ₹1000)
+    try:
+        amount_val = int(float(q) * 100)  # Convert rupees to paise
+        conditions.append(Payment.amount == amount_val)
+        # Also try raw paise match
+        conditions.append(Payment.amount == int(q))
+    except (ValueError, OverflowError):
+        pass
+
+    query = await db.execute(
+        select(RecoveryCase, Customer, Payment)
+        .join(Customer, RecoveryCase.customer_id == Customer.id)
+        .join(Payment, RecoveryCase.payment_id == Payment.id)
+        .where(or_(*conditions))
+        .order_by(RecoveryCase.opened_at.desc())
+        .limit(10)
+    )
+
+    results = []
+    for case, customer, payment in query.all():
+        results.append({
+            "id": str(case.id),
+            "customer_name": customer.name,
+            "customer_email": customer.email,
+            "amount": payment.amount,
+            "currency": payment.currency,
+            "failure_reason": payment.failure_reason or payment.failure_code,
+            "recovery_probability": case.recovery_probability,
+            "recommended_action": case.recommended_action,
+            "actual_action": case.actual_action,
+            "status": case.status,
+            "opened_at": case.opened_at,
+            "recovered_amount": case.recovered_amount,
+        })
+    return results
+
 
 @router.get("")
 async def get_recovery_cases(db: AsyncSession = Depends(get_db)):

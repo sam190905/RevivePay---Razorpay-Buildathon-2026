@@ -3,32 +3,24 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Files, 
-  Settings, 
-  Search, 
-  Bell, 
-  Sun, 
-  Moon, 
-  Menu
-} from "lucide-react";
+import { LayoutDashboard, Files, Settings, Bell, Sun, Moon, Menu } from "lucide-react";
 import { useTheme } from "./theme-provider";
+import { SearchCommand } from "./search-command";
 
 export function TopNav() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
 
   const navItems = [
-    { name: "Overview", href: "/", icon: LayoutDashboard },
+    { name: "Overview",       href: "/",      icon: LayoutDashboard },
     { name: "Recovery Cases", href: "/cases", icon: Files },
-    { name: "Demo Control", href: "/demo", icon: Settings },
+    { name: "Demo Control",   href: "/demo",  icon: Settings },
   ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[var(--border-subtle)] bg-[var(--surface-overlay)] backdrop-blur-md">
       <div className="flex h-16 items-center justify-between px-6">
-        
+
         {/* Left: Logo */}
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--brand)] text-white">
@@ -36,9 +28,7 @@ export function TopNav() {
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
             </svg>
           </div>
-          <span className="text-lg font-bold text-[var(--text-primary)]">
-            RevivePay
-          </span>
+          <span className="text-lg font-bold text-[var(--text-primary)]">RevivePay</span>
         </div>
 
         {/* Center: Main Navigation */}
@@ -50,8 +40,8 @@ export function TopNav() {
                 key={item.name}
                 href={item.href}
                 className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
-                  isActive 
-                    ? "bg-[var(--brand)] text-white shadow-md" 
+                  isActive
+                    ? "bg-[var(--brand)] text-white shadow-md"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)]"
                 }`}
               >
@@ -62,19 +52,13 @@ export function TopNav() {
           })}
         </nav>
 
-        {/* Right: Controls & Profile */}
+        {/* Right: Search + Controls + Profile */}
         <div className="flex items-center gap-4">
-          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-full text-[var(--text-muted)] text-sm">
-            <Search className="w-4 h-4" />
-            <input 
-              type="text" 
-              placeholder="Search anything..." 
-              className="bg-transparent border-none outline-none w-32 placeholder-[var(--text-muted)] text-[var(--text-primary)]"
-            />
-            <span className="text-xs border border-[var(--border-subtle)] rounded px-1 ml-2">⌘K</span>
-          </div>
 
-          <button 
+          {/* Search command palette */}
+          <SearchCommand />
+
+          <button
             onClick={toggleTheme}
             className="p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)] transition-colors border border-transparent hover:border-[var(--border-subtle)]"
             aria-label="Toggle theme"
@@ -96,7 +80,7 @@ export function TopNav() {
               <span className="text-[10px] text-[var(--text-muted)] leading-tight">Administrator</span>
             </div>
           </div>
-          
+
           <button className="md:hidden p-2 text-[var(--text-secondary)]">
             <Menu className="w-6 h-6" />
           </button>

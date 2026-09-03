@@ -117,3 +117,10 @@ export async function syncPaymentStatus(caseId: string): Promise<any> {
   const res = await api.post(`/recovery-cases/${caseId}/sync`);
   return res.data;
 }
+
+export async function searchRecoveryCases(query: string): Promise<RecoveryCase[]> {
+  const res = await api.get<RecoveryCase[]>("/recovery-cases/search", {
+    params: { q: query },
+  });
+  return res.data;
+}
