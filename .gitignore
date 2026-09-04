@@ -18,10 +18,12 @@ node_modules/
 out/
 .vercel
 
-# Environment
+# Environment — never commit real credentials
 .env
+backend/.env
 .env.local
 .env.*.local
+!.env.example
 
 # IDE
 .vscode/

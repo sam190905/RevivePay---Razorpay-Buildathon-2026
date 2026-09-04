@@ -28,11 +28,11 @@ class Settings(BaseSettings):
     razorpay_webhook_secret: str = Field(default="")
 
     # --- AI / LLM ---
-    ai_provider: str = Field(default="openai")
+    ai_provider: str = Field(default="gemini")
     openai_api_key: str = Field(default="")
     openai_model: str = Field(default="gpt-4o-mini")
     gemini_api_key: str = Field(default="")
-    gemini_model: str = Field(default="gemini-2.5-flash")
+    gemini_model: str = Field(default="gemini-3.6-flash")
 
     model_config = {
         "env_file": ".env",
