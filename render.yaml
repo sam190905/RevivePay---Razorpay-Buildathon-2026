@@ -50,10 +50,7 @@ services:
     startCommand: "npm run start"
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        fromService:
-          type: web
-          name: revivepay-backend
-          property: host
+        sync: false  # Set manually to https://<backend-url>.onrender.com
 
 databases:
   # -------------------------------------------------------------
