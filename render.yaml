@@ -25,10 +25,7 @@ services:
           name: revivepay-db
           property: connectionString
       - key: FRONTEND_URL
-        fromService:
-          type: web
-          name: revivepay-frontend
-          property: host
+        sync: false  # Set manually to https://<frontend-url>.onrender.com
       - key: RAZORPAY_KEY_ID
         sync: false
       - key: RAZORPAY_KEY_SECRET
