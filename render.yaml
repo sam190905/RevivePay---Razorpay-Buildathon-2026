@@ -26,6 +26,8 @@ services:
           property: connectionString
       - key: FRONTEND_URL
         sync: false  # Set manually to https://<frontend-url>.onrender.com
+      - key: BACKEND_URL
+        sync: false  # Set manually to https://<backend-url>.onrender.com
       - key: RAZORPAY_KEY_ID
         sync: false
       - key: RAZORPAY_KEY_SECRET

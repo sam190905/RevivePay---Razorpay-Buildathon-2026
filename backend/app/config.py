@@ -11,8 +11,20 @@ class Settings(BaseSettings):
     app_env: str = Field(default="development")
     app_debug: bool = Field(default=True)
     app_mode: str = Field(default="developer", env="APP_MODE")
-    backend_url: str = Field(default="http://localhost:8000")
+    backend_url: str = Field(default="")
     frontend_url: str = Field(default="http://localhost:3000")
+
+    @field_validator("backend_url", mode="before")
+    @classmethod
+    def resolve_backend_url(cls, v: str) -> str:
+        if isinstance(v, str) and v.strip():
+            return v.strip().rstrip("/")
+        import os
+        return (
+            os.getenv("BACKEND_URL")
+            or os.getenv("RENDER_EXTERNAL_URL")
+            or f"http://localhost:{os.getenv('PORT', '8000')}"
+        )
 
     # --- Database ---
     database_url: str = Field(
