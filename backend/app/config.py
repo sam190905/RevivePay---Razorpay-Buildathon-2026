@@ -1,7 +1,7 @@
 """Application configuration loaded from environment variables."""
 
 from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import Field, field_validator, model_validator
 
 
 class Settings(BaseSettings):
@@ -21,6 +21,32 @@ class Settings(BaseSettings):
     database_url_sync: str = Field(
         default="postgresql://revivepay:revivepay_dev@localhost:5433/revivepay"
     )
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def normalize_database_url(cls, v: str) -> str:
+        if isinstance(v, str):
+            if v.startswith("postgres://"):
+                return v.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif v.startswith("postgresql://") and not v.startswith("postgresql+asyncpg://"):
+                return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
+
+    @field_validator("database_url_sync", mode="before")
+    @classmethod
+    def normalize_database_url_sync(cls, v: str) -> str:
+        if isinstance(v, str):
+            if v.startswith("postgres://"):
+                return v.replace("postgres://", "postgresql://", 1)
+            elif v.startswith("postgresql+asyncpg://"):
+                return v.replace("postgresql+asyncpg://", "postgresql://", 1)
+        return v
+
+    @model_validator(mode="after")
+    def sync_fallback(self) -> "Settings":
+        if "localhost:5433" in self.database_url_sync and "localhost:5433" not in self.database_url:
+            self.database_url_sync = self.database_url.replace("+asyncpg", "")
+        return self
 
     # --- Razorpay ---
     razorpay_key_id: str = Field(default="")
